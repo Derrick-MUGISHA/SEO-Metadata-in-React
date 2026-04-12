@@ -2,12 +2,26 @@ import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
+import SEO from './components/SEO'
 
 function App() {
   const [count, setCount] = useState(0)
 
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "React Vite App",
+    "url": "https://example.com"
+  };
+
   return (
     <>
+      <SEO 
+        title="Home" 
+        description="Welcome to the high-performance Vite React application."
+        canonicalUrl="https://example.com/"
+        jsonLd={structuredData}
+      />
       <div>
         <a href="https://vite.dev" target="_blank">
           <img src={viteLogo} className="logo" alt="Vite logo" />

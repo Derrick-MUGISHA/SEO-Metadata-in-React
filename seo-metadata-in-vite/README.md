@@ -1,73 +1,25 @@
-# React + TypeScript + Vite
+# SEO & Metadata in React / Vite (Helmet)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This repository demonstrates how to integrate Client-Side Rendering (CSR) Search Engine Optimization tools directly into a barebones Vite/React environment.
 
-Currently, two official plugins are available:
+## How SEO Works in React SPA
+A standard React application ships an empty `<div>` node (`<div id="root"></div>`) to the browser, relying entirely on the browser's JavaScript engine to build the site visually. Historically, search engines couldn't read this, leading to blank indexing logs.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+To ensure your application's routes correctly emit metadata indicating what the page actually focuses on, we must manually rewrite the DOM `<head>` tag utilizing an abstraction layer. For React Applications, standard `react-helmet` used to be the go-to, but the concurrent threading architecture in React 18 introduced memory leaks, making `react-helmet-async` the undisputed modern standard.
 
-## React Compiler
+### Implementations in this Project:
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+1. **The Helmet Provider (`src/main.tsx`)**
+   - We wrapped our React tree (`<App />`) inside a `<HelmetProvider>` boundary. This ensures that every nested component shares a synchronized state tree isolating `<head>` mutations safely outside React's concurrent tree.
 
-## Expanding the ESLint configuration
+2. **The Reusable `<SEO />` Component (`src/components/SEO.tsx`)**
+   - To make assigning metadata streamlined, we created a localized `<SEO />` wrapper component. 
+   - When rendered, it feeds parameters like `title`, `description`, `canonicalUrl`, and `jsonLd` parameters directly into the `<Helmet>` hook which manipulates the browser's document head dynamically. 
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+3. **Page-Level Configuration (`src/App.tsx`)**
+   - The `<SEO />` component is invoked here passing a hard-coded JSON-LD structured data payload representing a `WebSite` Schema Object. Web crawlers parsing the React DOM lifecycle will process this data explicitly.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## Relevant Resources
+- [react-helmet-async NPM Package](https://www.npmjs.com/package/react-helmet-async)
+- [React SEO Guide By Ahrefs](https://ahrefs.com/blog/react-seo/)
+- [Vite Official Plugin: vite-plugin-prerender (For SSR Conversions)](https://github.com/vbenjs/vite-plugin-html)

@@ -1,59 +1,26 @@
-# SeoMetadataInAngular
+# SEO & Metadata in Angular (SSR / Universal)
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.2.
+This repository demonstrates how to implement dynamic SEO tagging and structured data across an Angular application using server-side rendering conventions.
 
-## Development server
+## How SEO Works in Angular
+Historically, Angular is a Client-Side Rendering (CSR) framework. This means Googlebot originally sees a shell like `<app-root></app-root>` instead of content. Modern Angular offsets this using SSR (Server-Side Rendering). However, even with SSR, Angular doesn't instinctively update the DOM `<head>` tags when users click around between routes.
 
-To start a local development server, run:
+To fix this, we have to leverage the `@angular/platform-browser` libraries safely using an injected Service, bridging the gap between Angular's component lifecycle and the raw DOM layer.
 
-```bash
-ng serve
-```
+### Implementations in this Project:
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+1. **The Centralized `SeoService` (`src/app/services/seo.service.ts`)**
+   - We created a dedicated Angular Service acting as a wrapper for Angular's native `Title` and `Meta` services.
+   - This service is responsible for updating document `<title>` strings and overwriting `og:title`, `og:description`, and `twitter:card` metatags efficiently without duplicating DOM entities.
 
-## Code scaffolding
+2. **Canonical Links (`src/app/services/seo.service.ts`)**
+   - Because Angular's standard `Meta` service doesn't cover `<link>` tags, we injected the native `DOCUMENT` context directly into the `SeoService` to safely parse and append `rel="canonical"` nodes natively on route transitions.
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+3. **JSON-LD Injection (`src/app/app.ts`)**
+   - Through the `SeoService`, we enabled `setJsonLd()`. When the `app-root` initializes (`ngOnInit`), it generates a Schema.org `application/ld+json` Script tag allowing Google to understand the application explicitly.
 
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+## Relevant Resources
+- [Angular Official Docs: Title Service](https://angular.io/api/platform-browser/Title)
+- [Angular Official Docs: Meta Service](https://angular.io/api/platform-browser/Meta)
+- [Angular SSR Execution and Hydration](https://angular.dev/guide/ssr)
+- [Schema.org Official Vocabulary Definitions](https://schema.org/)
